@@ -3,7 +3,8 @@ import requests
 import urllib3
 import os
 import config
-from telegram.ext import Updater, MessageHandler, Filters, CommandHandler, CallbackContext
+from telegram.ext import Updater, CommandHandler, CallbackContext
+from telegram import Message, InputFile
 
 # Increase the connection pool size
 urllib3.connectionpool.DEFAULT_MAX_POOLSIZE = 8
