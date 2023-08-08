@@ -1,6 +1,6 @@
 import telegram
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
-
+from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackContext
+from telegram.ext.filters import Filters
 import os
 import requests
 import config
