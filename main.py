@@ -1,3 +1,4 @@
+import telegram
 import requests
 import os
 import config
@@ -16,7 +17,7 @@ def send_file_to_user(file_path):
     return file_id
 
 def main():
-    bot = telegram.Bot(token=config.BOT_TOKEN, api_id=config.API_ID, api_hash=config.API_HASH)
+    bot = telegram.Bot(token=config.BOT_TOKEN)
 
     @bot.on(telegram.message.NewMessage)
     def handle_message(message):
