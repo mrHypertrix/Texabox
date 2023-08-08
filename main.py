@@ -2,9 +2,10 @@ import telegram
 import requests
 import os
 import config
+from telegram.ext import Updater, MessageHandler, Filters, CommandHandler, CallbackContext
 
 def get_terabox_file_video_link(message):
-    link = message.text
+    link = message.text.replace("/terabox ", "")  # Extract the link after /terabox command
     return link
 
 def download_terabox_file_video(link):
@@ -12,22 +13,23 @@ def download_terabox_file_video(link):
     with open("file.mp4", "wb") as f:
         f.write(r.content)
 
-def send_file_to_user(file_path):
-    file_id = bot.send_document(chat_id, file_path)
-    return file_id
+def send_file_to_user(update: telegram.Update, context: CallbackContext):
+    update.message.reply_document(document=open("file.mp4", "rb"))
 
 def main():
     bot = telegram.Bot(token=config.BOT_TOKEN)
+    updater = Updater(bot=bot, use_context=True)
+    dispatcher = updater.dispatcher
 
-    @bot.on(telegram.message.NewMessage)
-    def handle_message(message):
-        if message.text.startswith("/terabox"):
-            link = get_terabox_file_video_link(message)
-            download_terabox_file_video(link)
-            file_id = send_file_to_user("file.mp4")
-            message.reply_text("Your file has been sent. File ID: {}".format(file_id))
+    def handle_terabox(update: telegram.Update, context: CallbackContext):
+        link = get_terabox_file_video_link(update.message)
+        download_terabox_file_video(link)
+        send_file_to_user(update, context)
+    
+    dispatcher.add_handler(CommandHandler("terabox", handle_terabox))
 
-    bot.polling()
+    updater.start_polling()
+    updater.idle()
 
 if __name__ == "__main__":
     main()
