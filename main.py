@@ -1,13 +1,9 @@
 import telegram
 import requests
-import urllib3
 import os
 import config
-from telegram.ext import Updater, CommandHandler, CallbackContext
-from telegram import Message, InputFile
 
-# Increase the connection pool size
-urllib3.connectionpool.DEFAULT_MAX_POOLSIZE = 8
+bot = telegram.Bot(token=config.BOT_TOKEN)
 
 def get_terabox_file_video_link(message):
     link = message.text
@@ -18,25 +14,20 @@ def download_terabox_file_video(link):
     with open("file.mp4", "wb") as f:
         f.write(r.content)
 
-def send_file_to_user(file_path):
-    file_id = bot.send_document(chat_id, document=open(file_path, 'rb'))
-    return file_id
-
-def handle_terabox_command(update, context):
-    link = get_terabox_file_video_link(update.message)
-    download_terabox_file_video(link)
-    file_id = send_file_to_user("file.mp4")
-    update.message.reply_text("Your file has been sent. File ID: {}".format(file_id))
+def send_file_to_user(file_path, chat_id):
+    with open(file_path, 'rb') as f:
+        bot.send_video(chat_id=chat_id, video=f, supports_streaming=True)
 
 def main():
-    updater = Updater(token=config.BOT_TOKEN, use_context=True)
-    dispatcher = updater.dispatcher
+    @bot.message_handler(commands=['terabox'])
+    def handle_message(message):
+        chat_id = message.chat.id
+        link = get_terabox_file_video_link(message)
+        download_terabox_file_video(link)
+        send_file_to_user("file.mp4", chat_id)
+        message.reply_text("Your file has been sent.")
 
-    terabox_handler = CommandHandler('terabox', handle_terabox_command)
-    dispatcher.add_handler(terabox_handler)
-
-    updater.start_polling()
-    updater.idle()
+    bot.polling()
 
 if __name__ == "__main__":
     main()
